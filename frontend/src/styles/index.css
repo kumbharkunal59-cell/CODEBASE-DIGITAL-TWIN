@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-ink text-slate-200 font-sans antialiased;
+    background-image:
+      linear-gradient(rgba(94, 230, 198, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(94, 230, 198, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 12px rgba(94, 230, 198, 0.35);
+  }
+}
+
+.react-flow__attribution {
+  display: none;
+}

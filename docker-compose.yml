@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dt-postgres
+    environment:
+      POSTGRES_DB: digitaltwin
+      POSTGRES_USER: digitaltwin
+      POSTGRES_PASSWORD: digitaltwin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U digitaltwin"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: dt-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/digitaltwin
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - ./neo4j/init.cypher:/var/lib/neo4j/import/init.cypher
+
+  redis:
+    image: redis:7-alpine
+    container_name: dt-redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    container_name: dt-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_started
+      redis:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/digitaltwin
+      SPRING_DATASOURCE_USERNAME: digitaltwin
+      SPRING_DATASOURCE_PASSWORD: digitaltwin
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: digitaltwin
+      SPRING_DATA_REDIS_HOST: redis
+      AI_PROVIDER_BASE_URL: ${AI_PROVIDER_BASE_URL:-http://host.docker.internal:11434}
+      AI_PROVIDER_API_KEY: ${AI_PROVIDER_API_KEY:-}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: dt-frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api
+    ports:
+      - "5173:5173"
+
+volumes:
+  pg_data:
+  neo4j_data:
