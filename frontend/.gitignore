@@ -1,0 +1,27 @@
+# Java / Maven
+backend/target/
+*.class
+
+# Logs
+*.log
+backend/error.txt
+backend/log.txt
+backend/startup.txt
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

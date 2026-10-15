@@ -1,0 +1,11 @@
+backend/target/
+backend/*.txt
+*.log
+.env
+.env.*
+!.env.example
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.vscode/
+.idea/
